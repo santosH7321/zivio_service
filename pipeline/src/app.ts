@@ -1,6 +1,8 @@
 import chalk from "chalk"
 import inquirer from "inquirer";
 import { log } from "node:console";
+import fs from "fs"
+import path from "node:path";
 
 
 const validateService = (service: string)=>{
@@ -16,10 +18,19 @@ const validateService = (service: string)=>{
     return service.toLowerCase()
 }
 
-const exitApp = () => {
-    const message = chalk.bgGreenBright.black.bold("👋 Good Bye ! ")
+const exitApp = (msg: string | null = null) => {
+    const message = chalk.bgGreenBright.black.bold(msg || "👋 Good Bye ! ")
     log(message);
     process.exit(0);
+}
+
+const makeFolder = (path: string)=>{
+    const isExist = fs.existsSync(path)
+
+    if(isExist)
+        throw new Error(`${path.split("\\").pop()} service already exists !`)
+
+    fs.mkdirSync(path)
 }
 
 const app = async () => {
@@ -37,8 +48,23 @@ const app = async () => {
             exitApp()
         }
 
+        if(service === "pipeline"){
+            exitApp("Pipeline name not allowed")
+        }
+
         const serviceName = validateService(service)
-        console.log(serviceName)
+        const appPath = __dirname
+        const rootPath = path.resolve(appPath, "../../")
+        const servicePath = path.join(rootPath, serviceName) 
+        const srcPath = path.join(servicePath, "src")
+        const appFilePath = path.join(srcPath, "app.ts")
+
+        makeFolder(servicePath)
+        makeFolder(srcPath)
+        fs.writeFileSync(appFilePath, "")
+        
+        log(chalk.bgYellow.black.bold(`Success - ${serviceName} created successfully !`))
+        exitApp()
     }
     catch(err){
         if(err instanceof Error){
