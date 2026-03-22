@@ -1,3 +1,6 @@
+import dotenv from "dotenv"
+dotenv.config()
+
 import chalk from "chalk"
 import inquirer from "inquirer";
 import { log } from "node:console";
@@ -48,6 +51,16 @@ const createFiles = (files: string[], service: string, srcPath: string)=>{
         const filepath = path.join(srcPath, filename)
         fs.writeFileSync(filepath, "")
     })
+}
+
+const updateLastPort = (pipelinePath: string, newPort: number)=>{
+    const envFilePath = path.join(pipelinePath, ".env")
+    const envData = fs.readFileSync(envFilePath, "utf-8")
+    const updatedPortString = envData.replace(
+        /LAST_PORT\s*=\s*\d+/,
+        `LAST_PORT = ${newPort + 1}`
+    )
+    fs.writeFileSync(envFilePath, updatedPortString)
 }
 
 
@@ -104,6 +117,11 @@ const app = async () => {
         // creating app.ts
         fs.writeFileSync(appFilePath, "")
         
+        // change last port in pipeline
+        const lastPort = parseInt(process.env.LAST_PORT!)
+        updateLastPort(pipelinePath, lastPort)
+
+
         // copy all required files for typescripts
         copyFiles(filesListForCopy, pipelinePath, servicePath)
 
