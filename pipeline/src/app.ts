@@ -42,6 +42,15 @@ const copyFiles = (files: string[], inputPath: string, outputPath: string)=>{
     })
 }
 
+const createFiles = (files: string[], service: string, srcPath: string)=>{
+    files.forEach((file)=>{
+        const filename = `${service}${file}`
+        const filepath = path.join(srcPath, filename)
+        fs.writeFileSync(filepath, "")
+    })
+}
+
+
 const app = async () => {
     try {
         const welcomeMessage = chalk.bgMagenta.bold("---💥 Welcome team ! 💥 ---\n")
@@ -75,11 +84,31 @@ const app = async () => {
             "tsconfig.json"
         ]
 
+        const filesListForCreate = [
+            ".controller.ts",
+            ".service.ts",
+            ".model.ts",
+            ".interface.ts",
+            ".enum.ts",
+            ".middleware.ts",
+            ".dto.ts",
+            ".router.ts"
+        ]
+
+        // service folder
         makeFolder(servicePath)
+
+        // src folder inside service
         makeFolder(srcPath)
+
+        // creating app.ts
         fs.writeFileSync(appFilePath, "")
         
+        // copy all required files for typescripts
         copyFiles(filesListForCopy, pipelinePath, servicePath)
+
+        // creating required files for start codin
+        createFiles(filesListForCreate, serviceName, srcPath)
 
         log(chalk.bgYellow.black.bold(`Success - ${serviceName} created successfully !`))
         exitApp()
