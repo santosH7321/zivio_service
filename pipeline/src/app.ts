@@ -6,8 +6,11 @@ import inquirer from "inquirer";
 import { log } from "node:console";
 import fs from "fs"
 import path from "node:path";
+import {exec} from "child_process"
 import { appBoilerplate, interfaceBoilerplate, modelBoilerplate, routerBoilerplate } from "./util/biolerplate";
+import { promisify } from "node:util";
 
+const Exec = promisify(exec)
 
 const validateService = (service: string)=>{
     if(!service || service.length === 0)
@@ -166,7 +169,11 @@ const app = async () => {
         // creating required files for start codin
         createFiles(filesListForCreate, serviceName, srcPath)
 
+        log(chalk.bgGreen.black.bold(" 🚀 Installing dependencies... Please wait ⏳ "))
+        await Exec("npm install", {cwd: servicePath})
+
         log(chalk.bgYellow.black.bold(`Success - ${serviceName} created successfully !`))
+        log(chalk.green.bold(`🚀Browse service folder and write npm run dev`))
         exitApp()
     }
     catch(err){
