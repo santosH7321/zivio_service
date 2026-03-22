@@ -6,6 +6,7 @@ import inquirer from "inquirer";
 import { log } from "node:console";
 import fs from "fs"
 import path from "node:path";
+import { appBoilerplate } from "./util/biolerplate";
 
 
 const validateService = (service: string)=>{
@@ -136,11 +137,11 @@ const app = async () => {
         makeFolder(srcPath)
 
         // creating app.ts
-        fs.writeFileSync(appFilePath, "")
-        
-        // change last port in pipeline
         const lastPort = parseInt(process.env.LAST_PORT!)
         const newPort = lastPort+1
+        fs.writeFileSync(appFilePath, appBoilerplate(serviceName, newPort), "utf-8")
+        
+        // change last port in pipeline
 
         updateLastPort(pipelinePath, lastPort)
         createEnvForNewService(pipelinePath, servicePath, newPort)
