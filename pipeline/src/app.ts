@@ -33,6 +33,15 @@ const makeFolder = (path: string)=>{
     fs.mkdirSync(path)
 }
 
+const copyFiles = (files: string[], inputPath: string, outputPath: string)=>{
+    files.forEach((file)=>{
+        fs.copyFileSync(
+            path.join(`${inputPath}`, file),
+            path.join(`${outputPath}`, file)
+        )
+    })
+}
+
 const app = async () => {
     try {
         const welcomeMessage = chalk.bgMagenta.bold("---💥 Welcome team ! 💥 ---\n")
@@ -55,14 +64,23 @@ const app = async () => {
         const serviceName = validateService(service)
         const appPath = __dirname
         const rootPath = path.resolve(appPath, "../../")
+        const pipelinePath = path.resolve(appPath, "../")
         const servicePath = path.join(rootPath, serviceName) 
         const srcPath = path.join(servicePath, "src")
         const appFilePath = path.join(srcPath, "app.ts")
+        const filesListForCopy  = [
+            ".env",
+            "Dockerfile",
+            "package.json",
+            "tsconfig.json"
+        ]
 
         makeFolder(servicePath)
         makeFolder(srcPath)
         fs.writeFileSync(appFilePath, "")
         
+        copyFiles(filesListForCopy, pipelinePath, servicePath)
+
         log(chalk.bgYellow.black.bold(`Success - ${serviceName} created successfully !`))
         exitApp()
     }
