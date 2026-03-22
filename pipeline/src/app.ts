@@ -6,7 +6,7 @@ import inquirer from "inquirer";
 import { log } from "node:console";
 import fs from "fs"
 import path from "node:path";
-import { appBoilerplate } from "./util/biolerplate";
+import { appBoilerplate, interfaceBoilerplate, modelBoilerplate, routerBoilerplate } from "./util/biolerplate";
 
 
 const validateService = (service: string)=>{
@@ -46,11 +46,24 @@ const copyFiles = (files: string[], inputPath: string, outputPath: string)=>{
     })
 }
 
+const getBiolerplate = (file: string, service: string)=>{
+    if(file === ".router.ts")
+        return routerBoilerplate(service)
+
+    if(file === ".interface.ts")
+        return interfaceBoilerplate(service)
+
+    if(file === ".model.ts")
+        return modelBoilerplate(service)
+
+    return ""
+}
+
 const createFiles = (files: string[], service: string, srcPath: string)=>{
     files.forEach((file)=>{
         const filename = `${service}${file}`
         const filepath = path.join(srcPath, filename)
-        fs.writeFileSync(filepath, "")
+        fs.writeFileSync(filepath, getBiolerplate(file, service))
     })
 }
 

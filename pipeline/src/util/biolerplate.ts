@@ -33,3 +33,36 @@ export const appBoilerplate = (service: string, port: number)=>{
   ].join("\n")
 }
 
+export const routerBoilerplate = (service: string)=>{
+  return [
+    `import {Router, Request, Response} from "express"`,
+    `const ${getServiceInPascalCase(service)}Router = Router()\n`,
+    `${getServiceInPascalCase(service)}Router.get("/", (req: Request, res: Response)=>{`,
+    `\tres.json({message: "Hello from ${service} service"})`,
+    `})\n`,
+    `export default ${getServiceInPascalCase(service)}Router`
+  ].join("\n")
+}
+
+export const interfaceBoilerplate = (service: string)=>{
+  const Provider = getServiceInPascalCase(service)
+  return [
+    `import { Document } from "mongoose"\n`,
+    `export interface ${Provider}ModelInterface extends Document {\n`,
+    `\t`,
+    `}`
+  ].join("\n")
+}
+
+export const modelBoilerplate = (service: string)=>{
+  const Provider = getServiceInPascalCase(service)
+  return [
+    `import { Schema, model } from "mongoose"`,
+    `import { ${Provider}ModelInterface } from "./${service}.interface"\n`,
+    `const schema = new Schema<${Provider}ModelInterface>({\n`,
+    `\t`,
+    `}, {timestamps: true})\n`,
+    `const ${Provider}Model = model<${Provider}ModelInterface>("${Provider}", schema)`,
+    `export default ${Provider}Model`
+  ].join("\n")
+}
