@@ -58,11 +58,33 @@ const updateLastPort = (pipelinePath: string, newPort: number)=>{
     const envData = fs.readFileSync(envFilePath, "utf-8")
     const updatedPortString = envData.replace(
         /LAST_PORT\s*=\s*\d+/,
-        `LAST_PORT = ${newPort + 1}`
+        `LAST_PORT = ${newPort}`
     )
     fs.writeFileSync(envFilePath, updatedPortString)
 }
 
+const createEnvForNewService = (pipelinePath: string, servicePath: string, newPort: number)=>{
+    const pipelineEnvPath = path.join(pipelinePath, ".env")
+    const newEnvPath = path.join(servicePath, ".env")
+    const envData = fs.readFileSync(pipelineEnvPath, "utf-8")
+    const stringChangedAfterPort = envData.replace(
+        /PORT\s*=\s*\d+/,
+        `PORT = ${newPort}`
+    )
+    const arr = stringChangedAfterPort.split("\n")
+    const modifiedData = arr.map((item)=>{
+        if(item.startsWith("LAST_PORT"))
+            return null
+
+        if(item.startsWith("SERVER"))
+            return `SERVER = http://localhost:${newPort}\r`
+
+        return item
+    }).filter(Boolean)
+    
+    const finalData = modifiedData.join("\n")
+    fs.writeFileSync(newEnvPath, finalData)
+}
 
 const app = async () => {
     try {
@@ -91,7 +113,6 @@ const app = async () => {
         const srcPath = path.join(servicePath, "src")
         const appFilePath = path.join(srcPath, "app.ts")
         const filesListForCopy  = [
-            ".env",
             "Dockerfile",
             "package.json",
             "tsconfig.json"
@@ -119,7 +140,10 @@ const app = async () => {
         
         // change last port in pipeline
         const lastPort = parseInt(process.env.LAST_PORT!)
+        const newPort = lastPort+1
+
         updateLastPort(pipelinePath, lastPort)
+        createEnvForNewService(pipelinePath, servicePath, newPort)
 
 
         // copy all required files for typescripts
