@@ -103,6 +103,17 @@ const createEnvForNewService = (pipelinePath: string, servicePath: string, newPo
     fs.writeFileSync(newEnvPath, finalData)
 }
 
+const createDockerFileForNewService = (pipelinePath: string, servicePath: string, newPort: number)=>{
+    const pipelineDockerFilePath = path.join(pipelinePath, "Dockerfile")
+    const newDockerFilePath = path.join(servicePath, "Dockerfile")
+    const dockerFileData = fs.readFileSync(pipelineDockerFilePath, "utf-8")
+    const replacedWithDocker = dockerFileData.replace(
+        /EXPOSE\s*\d+/,
+        `EXPOSE ${newPort}`
+    )
+    fs.writeFileSync(newDockerFilePath, replacedWithDocker)
+}
+
 const app = async () => {
     try {
         const welcomeMessage = chalk.bgMagenta.bold("---💥 Welcome team ! 💥 ---\n")
@@ -130,7 +141,6 @@ const app = async () => {
         const srcPath = path.join(servicePath, "src")
         const appFilePath = path.join(srcPath, "app.ts")
         const filesListForCopy  = [
-            "Dockerfile",
             "package.json",
             "tsconfig.json"
         ]
@@ -161,6 +171,7 @@ const app = async () => {
 
         updateLastPort(pipelinePath, lastPort)
         createEnvForNewService(pipelinePath, servicePath, newPort)
+        createDockerFileForNewService(pipelinePath, servicePath, newPort)
 
 
         // copy all required files for typescripts

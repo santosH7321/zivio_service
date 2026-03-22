@@ -9,5 +9,7 @@
     "moduleResolution": "node",
     "forceConsistentCasingInFileNames": true,
     "skipLibCheck": false
-  }
+  },
+  "include": ["src/**/*"],
+  "exclude": ["dist"]
 }
