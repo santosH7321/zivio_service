@@ -7,7 +7,7 @@ import { log } from "node:console";
 import fs from "fs"
 import path from "node:path";
 import {exec} from "child_process"
-import { appBoilerplate, interfaceBoilerplate, modelBoilerplate, routerBoilerplate } from "./util/biolerplate";
+import { appBoilerplate, interfaceBoilerplate, modelBoilerplate, packageBoilerplate, routerBoilerplate } from "./util/biolerplate";
 import { promisify } from "node:util";
 
 const Exec = promisify(exec)
@@ -103,6 +103,12 @@ const createEnvForNewService = (pipelinePath: string, servicePath: string, newPo
     fs.writeFileSync(newEnvPath, finalData)
 }
 
+const createPackageForNewService = (service: string, servicePath: string)=>{
+    const data = JSON.stringify(packageBoilerplate(service));
+    const newPackagePath = path.join(servicePath, "package.json")
+    fs.writeFileSync(newPackagePath, data);
+}
+
 const createDockerFileForNewService = (pipelinePath: string, servicePath: string, newPort: number)=>{
     const pipelineDockerFilePath = path.join(pipelinePath, "Dockerfile")
     const newDockerFilePath = path.join(servicePath, "Dockerfile")
@@ -141,7 +147,6 @@ const app = async () => {
         const srcPath = path.join(servicePath, "src")
         const appFilePath = path.join(srcPath, "app.ts")
         const filesListForCopy  = [
-            "package.json",
             "tsconfig.json"
         ]
 
@@ -172,7 +177,7 @@ const app = async () => {
         updateLastPort(pipelinePath, lastPort)
         createEnvForNewService(pipelinePath, servicePath, newPort)
         createDockerFileForNewService(pipelinePath, servicePath, newPort)
-
+        createPackageForNewService(serviceName, servicePath)
 
         // copy all required files for typescripts
         copyFiles(filesListForCopy, pipelinePath, servicePath)
